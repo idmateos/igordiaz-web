@@ -169,10 +169,27 @@
   }
 }
 
-/* ===== Retro CRT terminal effects ===== */
+/* ===== Retro paper / terminal effects ===== */
 
-/* Scanlines overlay */
-.crt-scanlines::before {
+/* Graph-paper grid background */
+.paper-grid {
+  background-color: var(--background);
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 22px 22px;
+}
+
+/* Faint horizontal scanlines for a printed/CRT feel on light bg */
+.paper-scanlines::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -180,38 +197,18 @@
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    color-mix(in oklch, var(--foreground) 6%, transparent) 0px,
-    color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+    color-mix(in oklch, var(--foreground) 4%, transparent) 0px,
+    color-mix(in oklch, var(--foreground) 4%, transparent) 1px,
     transparent 1px,
-    transparent 3px
+    transparent 4px
   );
-  mix-blend-mode: multiply;
-}
-
-/* Subtle vignette + flicker */
-.crt-screen {
-  animation: crt-flicker 4s infinite steps(60);
-}
-
-@keyframes crt-flicker {
-  0%,
-  97%,
-  100% {
-    opacity: 1;
-  }
-  98% {
-    opacity: 0.92;
-  }
-  99% {
-    opacity: 0.97;
-  }
 }
 
 /* Blinking block cursor */
 .crt-cursor {
   display: inline-block;
-  width: 0.6em;
-  height: 1.05em;
+  width: 0.55em;
+  height: 1em;
   margin-left: 0.1em;
   background: var(--foreground);
   vertical-align: text-bottom;
@@ -224,16 +221,30 @@
   }
 }
 
-/* Soft text glow like phosphor */
-.crt-glow {
-  text-shadow: 0 0 1px color-mix(in oklch, var(--foreground) 60%, transparent);
+/* Marquee ticker */
+.marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 24s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Hard offset shadow (sticker / receipt look) */
+.shadow-hard {
+  box-shadow: 4px 4px 0 0 var(--foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .crt-screen {
-    animation: none;
-  }
-  .crt-cursor {
+  .crt-cursor,
+  .marquee {
     animation: none;
   }
 }

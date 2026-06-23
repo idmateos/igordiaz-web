@@ -38,186 +38,192 @@ const WORK = [
   },
 ]
 
-const BOOT_LINES = [
-  "booting portfolio.sys ...",
-  "loading modules: analysis, dev, strategy, product ... ok",
-  "mounting /home/tu-nombre ... ok",
-  "running whoami",
+const TICKER = [
+  "DATOS → DECISIONES",
+  "DECISIONES → PRODUCTO",
+  "DISCOVERY",
+  "EXPERIMENTACIÓN",
+  "ROADMAP",
+  "SQL · PYTHON · TS",
 ]
 
-function useBootSequence() {
-  const [shownLines, setShownLines] = useState<string[]>([])
-  const [done, setDone] = useState(false)
+const ASCII = String.raw`
+ _____ _   _    _   _  ___  __  __ ____  ____  _____
+|_   _| | | |  | \ | |/ _ \|  \/  | __ )|  _ \| ____|
+  | | | | | |  |  \| | | | | |\/| |  _ \| |_) |  _|
+  | | | |_| |  | |\  | |_| | |  | | |_) |  _ <| |___
+  |_|  \___/   |_| \_|\___/|_|  |_|____/|_| \_\_____|
+`
 
+function useTyped(text: string, start: boolean, speed = 45) {
+  const [out, setOut] = useState("")
   useEffect(() => {
+    if (!start) return
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     if (reduce) {
-      setShownLines(BOOT_LINES)
-      setDone(true)
+      setOut(text)
       return
     }
-
     let i = 0
-    const timers: ReturnType<typeof setTimeout>[] = []
-    const tick = () => {
-      setShownLines((prev) => [...prev, BOOT_LINES[i]])
+    const id = setInterval(() => {
       i += 1
-      if (i < BOOT_LINES.length) {
-        timers.push(setTimeout(tick, 450))
-      } else {
-        timers.push(setTimeout(() => setDone(true), 500))
-      }
-    }
-    timers.push(setTimeout(tick, 350))
-    return () => timers.forEach(clearTimeout)
-  }, [])
-
-  return { shownLines, done }
+      setOut(text.slice(0, i))
+      if (i >= text.length) clearInterval(id)
+    }, speed)
+    return () => clearInterval(id)
+  }, [text, start, speed])
+  return out
 }
 
 export default function Page() {
-  const { shownLines, done } = useBootSequence()
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 250)
+    return () => clearTimeout(t)
+  }, [])
+
+  const tagline = useTyped("Analista desarrollador · estrategia & producto", ready, 35)
 
   return (
-    <main
-      className="crt-scanlines min-h-screen"
-      style={
-        {
-          "--term-bg": "oklch(0.13 0 0)",
-          "--term-fg": "oklch(0.92 0 0)",
-          "--term-dim": "oklch(0.6 0 0)",
-          "--term-line": "oklch(0.32 0 0)",
-          backgroundColor: "var(--term-bg)",
-          color: "var(--term-fg)",
-        } as React.CSSProperties
-      }
-    >
-      <div className="crt-screen crt-glow mx-auto flex min-h-screen max-w-2xl flex-col px-6 py-12 md:py-20">
-        {/* Window chrome */}
-        <div
-          className="overflow-hidden border"
-          style={{ borderColor: "var(--term-line)" }}
-        >
-          <div
-            className="flex items-center justify-between border-b px-4 py-2 text-xs uppercase tracking-widest"
-            style={{ borderColor: "var(--term-line)", color: "var(--term-dim)" }}
-          >
-            <span>tu-nombre@portfolio: ~</span>
-            <span aria-hidden="true" className="flex gap-1.5">
-              <span className="inline-block size-2.5 rounded-full border" style={{ borderColor: "var(--term-dim)" }} />
-              <span className="inline-block size-2.5 rounded-full border" style={{ borderColor: "var(--term-dim)" }} />
-              <span className="inline-block size-2.5 rounded-full border" style={{ borderColor: "var(--term-dim)" }} />
+    <main className="paper-grid paper-scanlines min-h-screen text-foreground">
+      {/* Top ticker */}
+      <div className="overflow-hidden border-b border-foreground bg-foreground text-background">
+        <div className="marquee py-1.5 text-xs font-medium uppercase tracking-widest">
+          {[...TICKER, ...TICKER].map((t, i) => (
+            <span key={i} className="px-4">
+              {t} <span aria-hidden="true">✦</span>
             </span>
-          </div>
-
-          {/* Boot sequence */}
-          <div className="px-4 py-6">
-            <div className="space-y-1 text-xs" style={{ color: "var(--term-dim)" }}>
-              {shownLines.map((line, idx) => (
-                <p key={idx}>
-                  <span className="select-none">$ </span>
-                  {line}
-                </p>
-              ))}
-            </div>
-
-            {/* whoami output */}
-            {done && (
-              <div className="mt-5 animate-in fade-in duration-500">
-                <h1 className="text-2xl leading-tight md:text-3xl">
-                  Tu Nombre
-                  <span className="crt-cursor" aria-hidden="true" />
-                </h1>
-                <p className="mt-3 max-w-prose text-sm leading-relaxed" style={{ color: "var(--term-dim)" }}>
-                  Analista desarrollador. Experto en estrategia y producto.
-                  Convierto datos en decisiones y decisiones en producto.
-                </p>
-              </div>
-            )}
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* Content fades in after boot */}
-        <div
-          className={`mt-12 flex flex-1 flex-col transition-opacity duration-700 ${
-            done ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {/* Stack */}
-          <section className="mb-14">
-            <h2 className="mb-4 text-xs uppercase tracking-widest" style={{ color: "var(--term-dim)" }}>
-              {"// cat skills.txt"}
-            </h2>
-            <ul className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-              {STACK.map((item) => (
-                <li key={item} className="group flex items-center gap-2">
-                  <span aria-hidden="true" style={{ color: "var(--term-dim)" }} className="transition-transform group-hover:translate-x-0.5">
-                    ▸
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+      <div className="mx-auto max-w-3xl px-5 py-10 md:py-16">
+        {/* Header card */}
+        <header className="relative border-2 border-foreground bg-background p-5 shadow-hard">
+          <div className="mb-3 flex items-center justify-between border-b border-dashed border-foreground/40 pb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+            <span>~/portfolio — v1.0</span>
+            <span>{new Date().getFullYear()}</span>
+          </div>
 
-          {/* Work */}
-          <section className="mb-14">
-            <h2 className="mb-4 text-xs uppercase tracking-widest" style={{ color: "var(--term-dim)" }}>
-              {"// ls -la proyectos/"}
-            </h2>
-            <ul className="border-y" style={{ borderColor: "var(--term-line)" }}>
-              {WORK.map((p) => (
-                <li
-                  key={p.title}
-                  className="group grid cursor-default grid-cols-[3rem_1fr] gap-4 border-b py-4 text-sm transition-colors last:border-b-0 hover:bg-[oklch(0.92_0_0/0.05)]"
-                  style={{ borderColor: "var(--term-line)" }}
-                >
-                  <span style={{ color: "var(--term-dim)" }}>{p.year}</span>
-                  <div>
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h3 className="font-medium">
-                        <span aria-hidden="true" className="mr-1 inline-block opacity-0 transition-opacity group-hover:opacity-100">
-                          {">"}
-                        </span>
-                        {p.title}
-                      </h3>
-                      <span className="text-xs uppercase tracking-widest" style={{ color: "var(--term-dim)" }}>
-                        {p.role}
-                      </span>
-                    </div>
-                    <p className="mt-1" style={{ color: "var(--term-dim)" }}>
-                      {p.desc}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Contact */}
-          <footer
-            className="mt-auto border-t pt-6 text-sm"
-            style={{ borderColor: "var(--term-line)" }}
+          <pre
+            aria-hidden="true"
+            className="overflow-x-auto text-[6px] leading-[1.15] text-foreground sm:text-[9px] md:text-[11px]"
           >
-            <p className="mb-3 text-xs uppercase tracking-widest" style={{ color: "var(--term-dim)" }}>
-              {"// ./contacto.sh"}
-            </p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <a href="mailto:hola@tudominio.com" className="underline-offset-4 hover:underline">
-                hola@tudominio.com
-              </a>
-              <a href="https://linkedin.com" className="underline-offset-4 hover:underline">
-                LinkedIn
-              </a>
-              <a href="https://github.com" className="underline-offset-4 hover:underline">
-                GitHub
-              </a>
+            {ASCII}
+          </pre>
+
+          <h1 className="sr-only">Tu Nombre — analista desarrollador, estrategia y producto</h1>
+
+          <p className="mt-3 font-mono text-sm md:text-base">
+            <span className="select-none text-muted-foreground">{"> "}</span>
+            {tagline}
+            <span className="crt-cursor" aria-hidden="true" />
+          </p>
+
+          <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
+            Convierto datos en decisiones y decisiones en producto. Trabajo entre
+            el código, las métricas y la estrategia para construir cosas que
+            importan.
+          </p>
+
+          {/* corner tag */}
+          <span className="absolute -right-2 -top-2 rotate-3 border-2 border-foreground bg-background px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest shadow-hard">
+            disponible
+          </span>
+        </header>
+
+        {/* Stats strip */}
+        <div className="mt-6 grid grid-cols-3 gap-3">
+          {[
+            { n: "8+", l: "años" },
+            { n: "20+", l: "proyectos" },
+            { n: "3", l: "roles en 1" },
+          ].map((s) => (
+            <div
+              key={s.l}
+              className="border-2 border-foreground bg-background p-3 text-center"
+            >
+              <div className="font-mono text-2xl font-bold">{s.n}</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {s.l}
+              </div>
             </div>
-            <p className="mt-6 text-xs" style={{ color: "var(--term-dim)" }}>
-              © {new Date().getFullYear()} — hecho con café y SQL.
-            </p>
-          </footer>
+          ))}
         </div>
+
+        {/* Stack */}
+        <section className="mt-10">
+          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            <span className="inline-block h-2 w-2 bg-foreground" aria-hidden="true" />
+            cat skills.txt
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {STACK.map((item) => (
+              <li
+                key={item}
+                className="border border-foreground bg-background px-3 py-1.5 text-sm transition-all hover:-translate-y-0.5 hover:shadow-hard"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Work */}
+        <section className="mt-10">
+          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            <span className="inline-block h-2 w-2 bg-foreground" aria-hidden="true" />
+            ls -la proyectos/
+          </h2>
+          <ul className="space-y-3">
+            {WORK.map((p, idx) => (
+              <li
+                key={p.title}
+                className="group border-2 border-foreground bg-background p-4 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="flex items-baseline gap-2 font-medium">
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span aria-hidden="true" className="text-muted-foreground transition-transform group-hover:translate-x-1">
+                      {">"}
+                    </span>
+                    {p.title}
+                  </h3>
+                  <span className="border border-foreground px-2 py-0.5 text-[10px] uppercase tracking-widest">
+                    {p.role}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
+                <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  // {p.year}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Contact */}
+        <footer className="mt-10 border-2 border-foreground bg-foreground p-5 text-background shadow-hard">
+          <p className="mb-3 font-mono text-xs uppercase tracking-widest opacity-70">
+            ./contacto.sh
+          </p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <a href="mailto:hola@tudominio.com" className="underline-offset-4 hover:underline">
+              hola@tudominio.com
+            </a>
+            <a href="https://linkedin.com" className="underline-offset-4 hover:underline">
+              LinkedIn
+            </a>
+            <a href="https://github.com" className="underline-offset-4 hover:underline">
+              GitHub
+            </a>
+          </div>
+          <p className="mt-5 font-mono text-[10px] uppercase tracking-widest opacity-60">
+            © {new Date().getFullYear()} — hecho con café y SQL
+          </p>
+        </footer>
       </div>
     </main>
   )
