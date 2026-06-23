@@ -91,11 +91,6 @@ export default function Page() {
           </p>
         </header>
 
-        {/* Snake — cortesía de espera */}
-        <section className="mt-12">
-          <SnakeGame />
-        </section>
-
         {/* Stack */}
         <section className="mt-12">
           <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
@@ -134,6 +129,14 @@ export default function Page() {
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* Snake — cortesía de espera */}
+        <section className="mt-12">
+          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            {"// mientras esperas — juega"}
+          </h2>
+          <SnakeGame />
         </section>
 
         {/* Contact */}

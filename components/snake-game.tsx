@@ -24,100 +24,132 @@ function randomFood(snake: Point[]): Point {
 export function SnakeGame() {
   const [snake, setSnake] = useState<Point[]>(START)
   const [food, setFood] = useState<Point>({ x: 12, y: 8 })
-  const [dir, setDir] = useState<Point>({ x: 1, y: 0 })
   const [running, setRunning] = useState(false)
   const [over, setOver] = useState(false)
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(0)
 
-  const dirRef = useRef(dir)
+  // Refs keep the game loop stable so it never captures stale values.
+  const snakeRef = useRef<Point[]>(START)
+  const foodRef = useRef<Point>(food)
+  const dirRef = useRef<Point>({ x: 1, y: 0 })
   const queuedRef = useRef<Point | null>(null)
-  dirRef.current = dir
+  const runningRef = useRef(false)
+  const overRef = useRef(false)
 
   const reset = useCallback(() => {
-    setSnake(START)
-    setFood(randomFood(START))
-    setDir({ x: 1, y: 0 })
+    const fresh = START.slice()
+    snakeRef.current = fresh
+    foodRef.current = randomFood(fresh)
     dirRef.current = { x: 1, y: 0 }
     queuedRef.current = null
+    overRef.current = false
+    runningRef.current = true
+    setSnake(fresh)
+    setFood(foodRef.current)
     setScore(0)
     setOver(false)
     setRunning(true)
   }, [])
 
+  const start = useCallback(() => {
+    if (overRef.current) {
+      reset()
+      return
+    }
+    runningRef.current = true
+    setRunning(true)
+  }, [reset])
+
+  const pauseToggle = useCallback(() => {
+    if (overRef.current) {
+      reset()
+      return
+    }
+    runningRef.current = !runningRef.current
+    setRunning(runningRef.current)
+  }, [reset])
+
   const turn = useCallback((nd: Point) => {
     const cur = queuedRef.current ?? dirRef.current
-    if (cur.x + nd.x === 0 && cur.y + nd.y === 0) return // no reverse
+    // prevent reversing directly onto itself
+    if (cur.x + nd.x === 0 && cur.y + nd.y === 0) return
     queuedRef.current = nd
+    if (!runningRef.current && !overRef.current) {
+      runningRef.current = true
+      setRunning(true)
+    }
   }, [])
 
-  // Keyboard controls
+  // Keyboard controls (stable listener using refs)
   useEffect(() => {
+    const map: Record<string, Point> = {
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 },
+      w: { x: 0, y: -1 },
+      s: { x: 0, y: 1 },
+      a: { x: -1, y: 0 },
+      d: { x: 1, y: 0 },
+      W: { x: 0, y: -1 },
+      S: { x: 0, y: 1 },
+      A: { x: -1, y: 0 },
+      D: { x: 1, y: 0 },
+    }
     const onKey = (e: KeyboardEvent) => {
-      const map: Record<string, Point> = {
-        ArrowUp: { x: 0, y: -1 },
-        ArrowDown: { x: 0, y: 1 },
-        ArrowLeft: { x: -1, y: 0 },
-        ArrowRight: { x: 1, y: 0 },
-        w: { x: 0, y: -1 },
-        s: { x: 0, y: 1 },
-        a: { x: -1, y: 0 },
-        d: { x: 1, y: 0 },
-      }
       const nd = map[e.key]
       if (nd) {
         e.preventDefault()
-        if (!running && !over) setRunning(true)
         turn(nd)
+        return
       }
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault()
-        if (over) reset()
-        else setRunning((r) => !r)
+        pauseToggle()
       }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [running, over, turn, reset])
+  }, [turn, pauseToggle])
 
-  // Game loop
+  // Single stable game loop
   useEffect(() => {
-    if (!running) return
     const id = setInterval(() => {
-      setSnake((prev) => {
-        const nextDir = queuedRef.current ?? dirRef.current
-        queuedRef.current = null
-        setDir(nextDir)
-        const head = {
-          x: prev[0].x + nextDir.x,
-          y: prev[0].y + nextDir.y,
-        }
-        // wall or self collision
-        if (
-          head.x < 0 ||
-          head.y < 0 ||
-          head.x >= GRID ||
-          head.y >= GRID ||
-          prev.some((s) => s.x === head.x && s.y === head.y)
-        ) {
-          setOver(true)
-          setRunning(false)
-          setBest((b) => Math.max(b, prev.length - START.length))
-          return prev
-        }
-        const ate = head.x === food.x && head.y === food.y
-        const newSnake = [head, ...prev]
-        if (ate) {
-          setScore((s) => s + 1)
-          setFood(randomFood(newSnake))
-        } else {
-          newSnake.pop()
-        }
-        return newSnake
-      })
+      if (!runningRef.current || overRef.current) return
+
+      const nextDir = queuedRef.current ?? dirRef.current
+      queuedRef.current = null
+      dirRef.current = nextDir
+
+      const prev = snakeRef.current
+      const head = { x: prev[0].x + nextDir.x, y: prev[0].y + nextDir.y }
+
+      const hitWall = head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID
+      const hitSelf = prev.some((s) => s.x === head.x && s.y === head.y)
+      if (hitWall || hitSelf) {
+        overRef.current = true
+        runningRef.current = false
+        setOver(true)
+        setRunning(false)
+        setBest((b) => Math.max(b, prev.length - START.length))
+        return
+      }
+
+      const ate = head.x === foodRef.current.x && head.y === foodRef.current.y
+      const next = [head, ...prev]
+      if (ate) {
+        foodRef.current = randomFood(next)
+        setFood(foodRef.current)
+        setScore((s) => s + 1)
+      } else {
+        next.pop()
+      }
+      snakeRef.current = next
+      setSnake(next)
     }, SPEED)
     return () => clearInterval(id)
-  }, [running, food])
+  }, [])
 
   const cells = []
   for (let y = 0; y < GRID; y++) {
@@ -176,7 +208,7 @@ export function SnakeGame() {
             )}
             <button
               type="button"
-              onClick={() => (over ? reset() : setRunning(true))}
+              onClick={start}
               className="border-2 border-foreground bg-foreground px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-widest text-background transition-transform hover:-translate-y-0.5"
             >
               {over ? "reintentar" : "jugar"}
@@ -189,7 +221,7 @@ export function SnakeGame() {
       </div>
 
       {/* Mobile D-pad */}
-      <div className="mt-4 grid grid-cols-3 gap-2 sm:hidden">
+      <div className="mx-auto mt-4 grid max-w-[180px] grid-cols-3 gap-2 sm:hidden">
         <span />
         <DPadButton label="↑" onPress={() => turn({ x: 0, y: -1 })} />
         <span />
