@@ -168,3 +168,72 @@
     @apply font-sans;
   }
 }
+
+/* ===== Retro CRT terminal effects ===== */
+
+/* Scanlines overlay */
+.crt-scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--foreground) 6%, transparent) 0px,
+    color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* Subtle vignette + flicker */
+.crt-screen {
+  animation: crt-flicker 4s infinite steps(60);
+}
+
+@keyframes crt-flicker {
+  0%,
+  97%,
+  100% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0.92;
+  }
+  99% {
+    opacity: 0.97;
+  }
+}
+
+/* Blinking block cursor */
+.crt-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.05em;
+  margin-left: 0.1em;
+  background: var(--foreground);
+  vertical-align: text-bottom;
+  animation: crt-blink 1s steps(2) infinite;
+}
+
+@keyframes crt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Soft text glow like phosphor */
+.crt-glow {
+  text-shadow: 0 0 1px color-mix(in oklch, var(--foreground) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crt-screen {
+    animation: none;
+  }
+  .crt-cursor {
+    animation: none;
+  }
+}
