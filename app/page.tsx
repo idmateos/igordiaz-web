@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { SnakeGame } from "@/components/snake-game"
 
 const STACK = [
   "Análisis de datos",
@@ -38,24 +39,7 @@ const WORK = [
   },
 ]
 
-const TICKER = [
-  "DATOS → DECISIONES",
-  "DECISIONES → PRODUCTO",
-  "DISCOVERY",
-  "EXPERIMENTACIÓN",
-  "ROADMAP",
-  "SQL · PYTHON · TS",
-]
-
-const ASCII = String.raw`
- _____ _   _    _   _  ___  __  __ ____  ____  _____
-|_   _| | | |  | \ | |/ _ \|  \/  | __ )|  _ \| ____|
-  | | | | | |  |  \| | | | | |\/| |  _ \| |_) |  _|
-  | | | |_| |  | |\  | |_| | |  | | |_) |  _ <| |___
-  |_|  \___/   |_| \_|\___/|_|  |_|____/|_| \_\_____|
-`
-
-function useTyped(text: string, start: boolean, speed = 45) {
+function useTyped(text: string, start: boolean, speed = 40) {
   const [out, setOut] = useState("")
   useEffect(() => {
     if (!start) return
@@ -78,90 +62,50 @@ function useTyped(text: string, start: boolean, speed = 45) {
 export default function Page() {
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    const t = setTimeout(() => setReady(true), 250)
+    const t = setTimeout(() => setReady(true), 200)
     return () => clearTimeout(t)
   }, [])
 
   const tagline = useTyped("Analista desarrollador · estrategia & producto", ready, 35)
 
   return (
-    <main className="paper-grid paper-scanlines min-h-screen text-foreground">
-      {/* Top ticker */}
-      <div className="overflow-hidden border-b border-foreground bg-foreground text-background">
-        <div className="marquee py-1.5 text-xs font-medium uppercase tracking-widest">
-          {[...TICKER, ...TICKER].map((t, i) => (
-            <span key={i} className="px-4">
-              {t} <span aria-hidden="true">✦</span>
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-3xl px-5 py-10 md:py-16">
-        {/* Header card */}
-        <header className="relative border-2 border-foreground bg-background p-5 shadow-hard">
-          <div className="mb-3 flex items-center justify-between border-b border-dashed border-foreground/40 pb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-            <span>~/portfolio — v1.0</span>
-            <span>{new Date().getFullYear()}</span>
-          </div>
-
-          <pre
-            aria-hidden="true"
-            className="overflow-x-auto text-[6px] leading-[1.15] text-foreground sm:text-[9px] md:text-[11px]"
-          >
-            {ASCII}
-          </pre>
-
-          <h1 className="sr-only">Tu Nombre — analista desarrollador, estrategia y producto</h1>
-
+    <main className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-2xl px-5 py-14 md:py-20">
+        {/* Header */}
+        <header>
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            ~/portfolio
+          </p>
+          <h1 className="mt-3 text-balance text-3xl font-bold leading-tight md:text-4xl">
+            Tu Nombre
+          </h1>
           <p className="mt-3 font-mono text-sm md:text-base">
             <span className="select-none text-muted-foreground">{"> "}</span>
             {tagline}
             <span className="crt-cursor" aria-hidden="true" />
           </p>
-
-          <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-4 max-w-prose leading-relaxed text-muted-foreground">
             Convierto datos en decisiones y decisiones en producto. Trabajo entre
             el código, las métricas y la estrategia para construir cosas que
             importan.
           </p>
-
-          {/* corner tag */}
-          <span className="absolute -right-2 -top-2 rotate-3 border-2 border-foreground bg-background px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest shadow-hard">
-            disponible
-          </span>
         </header>
 
-        {/* Stats strip */}
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          {[
-            { n: "8+", l: "años" },
-            { n: "20+", l: "proyectos" },
-            { n: "3", l: "roles en 1" },
-          ].map((s) => (
-            <div
-              key={s.l}
-              className="border-2 border-foreground bg-background p-3 text-center"
-            >
-              <div className="font-mono text-2xl font-bold">{s.n}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                {s.l}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Snake — cortesía de espera */}
+        <section className="mt-12">
+          <SnakeGame />
+        </section>
 
         {/* Stack */}
-        <section className="mt-10">
-          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            <span className="inline-block h-2 w-2 bg-foreground" aria-hidden="true" />
-            cat skills.txt
+        <section className="mt-12">
+          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            // qué hago
           </h2>
           <ul className="flex flex-wrap gap-2">
             {STACK.map((item) => (
               <li
                 key={item}
-                className="border border-foreground bg-background px-3 py-1.5 text-sm transition-all hover:-translate-y-0.5 hover:shadow-hard"
+                className="border border-foreground px-3 py-1.5 text-sm"
               >
                 {item}
               </li>
@@ -170,46 +114,34 @@ export default function Page() {
         </section>
 
         {/* Work */}
-        <section className="mt-10">
-          <h2 className="mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            <span className="inline-block h-2 w-2 bg-foreground" aria-hidden="true" />
-            ls -la proyectos/
+        <section className="mt-12">
+          <h2 className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            // proyectos
           </h2>
-          <ul className="space-y-3">
-            {WORK.map((p, idx) => (
-              <li
-                key={p.title}
-                className="group border-2 border-foreground bg-background p-4 transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className="flex items-baseline gap-2 font-medium">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {String(idx + 1).padStart(2, "0")}
+          <ul className="divide-y divide-border border-y border-border">
+            {WORK.map((p) => (
+              <li key={p.title} className="group flex gap-4 py-4">
+                <span className="font-mono text-xs text-muted-foreground">{p.year}</span>
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 className="font-medium">{p.title}</h3>
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {p.role}
                     </span>
-                    <span aria-hidden="true" className="text-muted-foreground transition-transform group-hover:translate-x-1">
-                      {">"}
-                    </span>
-                    {p.title}
-                  </h3>
-                  <span className="border border-foreground px-2 py-0.5 text-[10px] uppercase tracking-widest">
-                    {p.role}
-                  </span>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{p.desc}</p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  // {p.year}
-                </p>
               </li>
             ))}
           </ul>
         </section>
 
         {/* Contact */}
-        <footer className="mt-10 border-2 border-foreground bg-foreground p-5 text-background shadow-hard">
-          <p className="mb-3 font-mono text-xs uppercase tracking-widest opacity-70">
-            ./contacto.sh
-          </p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <footer className="mt-12 border-t border-border pt-6">
+          <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            // contacto
+          </h2>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <a href="mailto:hola@tudominio.com" className="underline-offset-4 hover:underline">
               hola@tudominio.com
             </a>
@@ -220,7 +152,7 @@ export default function Page() {
               GitHub
             </a>
           </div>
-          <p className="mt-5 font-mono text-[10px] uppercase tracking-widest opacity-60">
+          <p className="mt-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             © {new Date().getFullYear()} — hecho con café y SQL
           </p>
         </footer>
