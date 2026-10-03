@@ -6,10 +6,10 @@ export default function Page() {
           id="page-title"
           className="text-balance text-3xl font-medium tracking-tight md:text-5xl"
         >
-          ¿Tienes un problema o una necesidad?
+          Do you have a problem or a need?
         </h1>
         <p className="mt-5 text-lg text-muted-foreground md:text-xl">
-          Yo tengo la solución, déjame saber:
+          I have the solution, let me know:
         </p>
         <a
           href="mailto:solutions@igordiaz.com"
@@ -23,6 +23,6 @@ export default function Page() {
 }
 
 export const metadata = {
-  title: "Soluciones — Igor Díaz",
-  description: "¿Tienes un problema o una necesidad? Hablemos.",
+  title: "Solutions — Igor Díaz",
+  description: "Do you have a problem or a need? Let’s talk.",
 }

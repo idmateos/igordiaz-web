@@ -10,9 +10,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'analista · desarrollador · estrategia & producto',
-  description:
-    'Portfolio retro en blanco y negro de un analista desarrollador experto en estrategia y producto.',
+  title: 'Solutions — Igor Díaz',
+  description: 'A simple way to connect with Igor Díaz about your next solution.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -48,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="es"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} bg-background`}
     >
       <body className="font-mono antialiased">
