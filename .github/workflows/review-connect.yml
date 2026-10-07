@@ -43,14 +43,14 @@ jobs:
         with:
           node-version: 24
       - uses: actions/configure-pages@v5
-      - run: corepack enable && pnpm install --frozen-lockfile && pnpm run build
+      - run: corepack enable && corepack prepare pnpm@10 --activate && pnpm install --frozen-lockfile && pnpm run build
       - name: Review Connect · prepare
         run: |
           curl -fsSL "$REVIEW_CONNECT_URL/cli/review-connect.mjs" -o "$RUNNER_TEMP/review-connect.mjs"
-          node "$RUNNER_TEMP/review-connect.mjs" prepare --html-dir dist
+          node "$RUNNER_TEMP/review-connect.mjs" prepare --html-dir out
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: out
       - id: deploy
         uses: actions/deploy-pages@v4
       - name: Review Connect · publish
