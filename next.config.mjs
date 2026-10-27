@@ -4,7 +4,7 @@ const nextConfig = {
   output: 'export',
   // Project Pages serve the site under /igordiaz-web; drop this (and the
   // comment) when a custom domain serves it from the root.
-  basePath: '/igordiaz-web',
+  basePath: process.env.GITHUB_ACTIONS ? '/igordiaz-web' : '',
   typescript: {
     ignoreBuildErrors: true,
   },
